@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Permission to use the device camera -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Declares the use of camera hardware -->
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+
+    <application>
+        <!-- Declare the activity for the QR code scanner -->
+        <activity
+            android:name=".view.HiQrCodeListActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        </activity>
+    </application>
+
+</manifest>
