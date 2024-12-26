@@ -46,8 +46,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.feat.util)
-
     // AndroidX Core, Compose
     implementation(libs.androidx.core.ktx) // Core KTX
     implementation(libs.androidx.appcompat) // AppCompat
@@ -91,7 +89,7 @@ publishing {
             // Define Maven artifact metadata
             groupId = "com.github.clodymade"    // GitHub username as group ID
             artifactId = "feat_qr"             // Module name as artifact ID
-            version = "1.0.0"                   // Version matching the Git tag
+            version = "1.0.1"                   // Version matching the Git tag
 
             // Configure POM metadata
             pom {

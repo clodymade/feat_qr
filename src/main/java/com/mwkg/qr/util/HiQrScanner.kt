@@ -30,9 +30,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.mwkg.qr.model.HiQrResult
-import com.mwkg.util.HiPermissionType
-import com.mwkg.util.PermissionReqCodes
-import com.mwkg.util.hiHasPermissions
+import com.mwkg.qr.util.HiToolkit.hasPermissions
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -82,7 +80,7 @@ object HiQrScanner {
 
         // Check for camera permissions
         val reqPermissions = HiPermissionType.CAMERA.requiredPermissions()
-        if (!activity.hiHasPermissions(reqPermissions)) {
+        if (!activity.hasPermissions(reqPermissions)) {
             activity.requestPermissions(reqPermissions, PermissionReqCodes.CAMERA)
             return
         }
@@ -131,7 +129,7 @@ object HiQrScanner {
     fun hasRequiredPermissions(): Boolean {
         return activity?.let {
             val reqPermissions = HiPermissionType.CAMERA.requiredPermissions()
-            it.hiHasPermissions(reqPermissions)
+            it.hasPermissions(reqPermissions)
         } ?: false
     }
 
