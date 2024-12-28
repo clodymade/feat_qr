@@ -78,9 +78,9 @@ object HiQrScanner {
         initialize() // Set up the scanner resources
 
         // Check for camera permissions
-        val reqPermissions = HiPermissionType.CAMERA.requiredPermissions()
+        val reqPermissions = HiQrPermissionType.CAMERA.requiredPermissions()
         if (!activity.hasPermissions(reqPermissions)) {
-            activity.requestPermissions(reqPermissions, PermissionReqCodes.CAMERA)
+            activity.requestPermissions(reqPermissions, HiQrPermissionReqCodes.CAMERA)
             return
         }
 
@@ -127,7 +127,7 @@ object HiQrScanner {
     // Checks if the required permissions are granted
     fun hasRequiredPermissions(): Boolean {
         return activity?.let {
-            val reqPermissions = HiPermissionType.CAMERA.requiredPermissions()
+            val reqPermissions = HiQrPermissionType.CAMERA.requiredPermissions()
             it.hasPermissions(reqPermissions)
         } ?: false
     }
