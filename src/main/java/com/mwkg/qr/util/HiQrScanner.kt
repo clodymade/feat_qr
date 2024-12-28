@@ -18,7 +18,6 @@ package com.mwkg.qr.util
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
-import android.util.Size
 import androidx.annotation.OptIn
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -30,7 +29,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.mwkg.qr.model.HiQrResult
-import com.mwkg.qr.util.HiToolkit.hasPermissions
+import com.mwkg.qr.util.HiQrToolkit.hasPermissions
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
