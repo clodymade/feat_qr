@@ -15,15 +15,19 @@
 
 package com.mwkg.qr.view
 
+import android.Manifest
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.mutableStateOf
 import com.mwkg.qr.model.HiQrCode
+import com.mwkg.qr.util.HiQrPermissionType
 import com.mwkg.qr.util.HiQrScanner
+import com.mwkg.qr.util.HiQrToolkit.hasPermissions
 import com.mwkg.qr.viewmodel.HiQrCodeListViewModel
 
 /**
@@ -36,12 +40,49 @@ class HiQrCodeListActivity : ComponentActivity() {
     // State to track visibility of the camera preview
     private var isPreviewVisible = mutableStateOf(true)
 
+    private lateinit var previewView: PreviewView
+
+    private val requestPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach { (permission, isGranted) ->
+                Log.d("PermissionResult", "$permission: $isGranted")
+            }
+
+            val isCameraGranted = permissions[Manifest.permission.CAMERA] ?: false
+            if (isCameraGranted) {
+                startQrScanner()
+            } else {
+                HiQrScanner.stop()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Camera preview view
-        val previewView = PreviewView(this)
+        // Initialize the CameraX preview view
+        previewView = PreviewView(this)
 
+        val reqPermissions = HiQrPermissionType.CAMERA.requiredPermissions()
+        if (!hasPermissions(reqPermissions)) {
+            requestPermissionsLauncher.launch(reqPermissions)
+        }
+        else {
+            startQrScanner()
+        }
+
+        // Set the UI content using Jetpack Compose
+        setContent {
+            HiQrCodeListActivityScreen(
+                qrCodes = viewModel.codes, // Reactive list of QR codes from the ViewModel
+                previewView = previewView, // The camera preview view
+                onBackPressed = { finish() }, // Handle back press
+                onToggleTorch = { isOn -> HiQrScanner.toggleTorch(isOn) }, // Control the camera torch
+                isPreviewVisible = isPreviewVisible, // Track whether the preview is visible
+            )
+        }
+    }
+
+    private fun startQrScanner() {
         // Start the QR scanner
         HiQrScanner.start(
             activity = this,
@@ -60,17 +101,6 @@ class HiQrCodeListActivity : ComponentActivity() {
             // Stop the scanner and hide the preview
             HiQrScanner.stop()
             isPreviewVisible.value = false
-        }
-
-        // Set the UI content using Jetpack Compose
-        setContent {
-            HiQrCodeListActivityScreen(
-                qrCodes = viewModel.codes, // Reactive list of QR codes from the ViewModel
-                previewView = previewView, // The camera preview view
-                onBackPressed = { finish() }, // Handle back press
-                onToggleTorch = { isOn -> HiQrScanner.toggleTorch(isOn) }, // Control the camera torch
-                isPreviewVisible = isPreviewVisible, // Track whether the preview is visible
-            )
         }
     }
 

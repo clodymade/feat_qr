@@ -18,6 +18,7 @@ package com.mwkg.qr.util
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
+import android.view.Surface
 import androidx.annotation.OptIn
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -89,15 +90,16 @@ object HiQrScanner {
         // Set up the camera provider and configure preview, analysis, and selection
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
+            val rotation = previewView.display?.rotation ?: Surface.ROTATION_0
 
             val preview = Preview.Builder()
-                .setTargetRotation(previewView.display.rotation) // Align preview with display rotation
+                .setTargetRotation(rotation) // Align preview with display rotation
                 .build().also {
                     it.surfaceProvider = previewView.surfaceProvider
                 }
 
             val imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetRotation(previewView.display.rotation) // Align analyzer with display rotation
+                .setTargetRotation(rotation) // Align analyzer with display rotation
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // Process only the latest frame
                 .build().also {
                     it.setAnalyzer(cameraExecutor!!) { imageProxy -> // Pass each frame to the analyzer
@@ -109,7 +111,10 @@ object HiQrScanner {
             try {
                 cameraProvider.unbindAll() // Unbind previous use cases
                 val camera = cameraProvider.bindToLifecycle(
-                    activity as LifecycleOwner, cameraSelector, preview, imageAnalyzer
+                    activity as LifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageAnalyzer
                 )
                 cameraControl = camera.cameraControl // Initialize camera control
             } catch (exc: Exception) {
