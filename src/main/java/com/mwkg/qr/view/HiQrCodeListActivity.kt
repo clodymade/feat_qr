@@ -42,33 +42,11 @@ class HiQrCodeListActivity : ComponentActivity() {
 
     private lateinit var previewView: PreviewView
 
-    private val requestPermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            permissions.entries.forEach { (permission, isGranted) ->
-                Log.d("PermissionResult", "$permission: $isGranted")
-            }
-
-            val isCameraGranted = permissions[Manifest.permission.CAMERA] ?: false
-            if (isCameraGranted) {
-                startQrScanner()
-            } else {
-                HiQrScanner.stop()
-            }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Initialize the CameraX preview view
         previewView = PreviewView(this)
-
-        val reqPermissions = HiQrPermissionType.CAMERA.requiredPermissions()
-        if (!hasPermissions(reqPermissions)) {
-            requestPermissionsLauncher.launch(reqPermissions)
-        }
-        else {
-            startQrScanner()
-        }
 
         // Set the UI content using Jetpack Compose
         setContent {
@@ -80,6 +58,8 @@ class HiQrCodeListActivity : ComponentActivity() {
                 isPreviewVisible = isPreviewVisible, // Track whether the preview is visible
             )
         }
+
+        startQrScanner()
     }
 
     private fun startQrScanner() {

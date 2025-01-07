@@ -19,12 +19,16 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
 import android.view.Surface
+import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
+import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.camera.view.PreviewView
+import androidx.core.app.ActivityCompat
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -71,21 +75,51 @@ object HiQrScanner {
      * @param previewView The view for displaying the camera preview.
      * @param callback The callback for delivering scan results.
      */
-    @OptIn(ExperimentalGetImage::class)
     fun start(activity: Activity, previewView: PreviewView, callback: (HiQrResult) -> Unit) {
         HiQrScanner.activity = activity
         HiQrScanner.callback = callback
 
         initialize() // Set up the scanner resources
 
-        // Check for camera permissions
         val reqPermissions = HiQrPermissionType.CAMERA.requiredPermissions()
+
+        // Check if the permissions are granted
         if (!activity.hasPermissions(reqPermissions)) {
-            activity.requestPermissions(reqPermissions, HiQrPermissionReqCodes.CAMERA)
+            if (activity is AppCompatActivity) {
+                ActivityCompat.requestPermissions(
+                    activity,
+                    reqPermissions,
+                    HiQrPermissionReqCodes.CAMERA
+                )
+            } else if (activity is ComponentActivity) {
+                val launcher = activity.registerForActivityResult(
+                    ActivityResultContracts.RequestMultiplePermissions()
+                ) { permissions ->
+                    val allGranted = permissions.all { it.value }
+                    if (allGranted) {
+                        startScanner(previewView)
+                    } else {
+                        Log.e("ModularX::HiQrScanner", "Permissions not granted.")
+                    }
+                }
+                launcher.launch(reqPermissions)
+            } else {
+                throw IllegalArgumentException("Unsupported activity type")
+            }
             return
         }
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
+        // Start scanning if permissions are already granted
+        startScanner(previewView)
+    }
+
+    /**
+     * Handles the core logic to start the scanner once permissions are granted.
+     */
+    private fun startScanner(
+        previewView: PreviewView
+    ) {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(activity!!)
 
         // Set up the camera provider and configure preview, analysis, and selection
         cameraProviderFuture.addListener({
@@ -120,7 +154,7 @@ object HiQrScanner {
             } catch (exc: Exception) {
                 Log.e("ModularX::HiQrScanner", "Failed to bind camera: ${exc.message}")
             }
-        }, ContextCompat.getMainExecutor(activity))
+        }, ContextCompat.getMainExecutor(activity!!))
     }
 
     // Stops the QR scanner and releases resources

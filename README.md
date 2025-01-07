@@ -83,14 +83,7 @@ Integrate the scanner into your activity:
 
 ```kotlin
 HiQrScanner.start(activity = this, previewView = previewView) { result ->  
-    when (result) {  
-        is HiResult.HiQrResult -> {  
-            println("QR Code Content: ${result.qrData}")  
-        }  
-        else -> {  
-            println("Error: ${result.error}")  
-        }  
-    }  
+    println("QR Code Content: ${result.qrData}")  
 }  
 ```
 
